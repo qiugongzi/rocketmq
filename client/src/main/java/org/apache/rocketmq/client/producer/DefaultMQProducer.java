@@ -16,13 +16,6 @@
  */
 package org.apache.rocketmq.client.producer;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
 import org.apache.rocketmq.client.ClientConfig;
 import org.apache.rocketmq.client.QueryResult;
 import org.apache.rocketmq.client.Validators;
@@ -46,6 +39,14 @@ import org.apache.rocketmq.common.topic.TopicValidator;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.remoting.exception.RemotingException;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
 
 /**
  * This class is the entry point for applications intending to send messages. </p>
@@ -83,6 +84,9 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      *
      * See <a href="http://rocketmq.apache.org/docs/core-concept/">core concepts</a> for more discussion.
      */
+    
+    // note 同一类Producer的集合，这类Producer发送同一类消息且发送逻辑一致。如果发送的是事务消息且原始生产者在发送之后崩溃，
+    //  则Broker服务器会联系同一生产者组的其他生产者实例以提交或回溯消费。
     private String producerGroup;
 
     /**
@@ -104,6 +108,8 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      * Compress message body threshold, namely, message body larger than 4k will be compressed on default.
      */
     private int compressMsgBodyOverHowmuch = 1024 * 4;
+    
+    // note 失败重试时都有可能导致消息重复，需要应用自己解决
 
     /**
      * Maximum number of retry to perform internally before claiming sending failure in synchronous mode. </p>
@@ -119,6 +125,8 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      */
     private int retryTimesWhenSendAsyncFailed = 2;
 
+    // note 消息刷盘（主或备）超时或 slave 不可用（返回状态非 SEND_OK），
+    //  是否尝试发送到其他 broker，默认 false。十分重要消息可以开启。
     /**
      * Indicate whether to retry another broker on sending failure internally.
      */

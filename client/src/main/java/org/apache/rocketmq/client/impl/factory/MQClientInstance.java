@@ -145,6 +145,7 @@ public class MQClientInstance {
         ClientRemotingProcessor clientRemotingProcessor = new ClientRemotingProcessor(this);
         this.mQClientAPIImpl = new MQClientAPIImpl(this.nettyClientConfig, clientRemotingProcessor, rpcHook, clientConfig);
 
+        // note 初始化通过配置加载namesrv地址
         if (this.clientConfig.getNamesrvAddr() != null) {
             this.mQClientAPIImpl.updateNameServerAddressList(this.clientConfig.getNamesrvAddr());
             log.info("user specified name server address: {}", this.clientConfig.getNamesrvAddr());
@@ -277,8 +278,10 @@ public class MQClientInstance {
             }
         }
     }
-
+    
+   
     private void startScheduledTask() {
+        // note 如果配置文件没有指定namesrv地址 则定时任务获取namesrv地址
         if (null == this.clientConfig.getNamesrvAddr()) {
             this.scheduledExecutorService.scheduleAtFixedRate(() -> {
                 try {

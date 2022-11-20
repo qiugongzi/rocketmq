@@ -16,8 +16,6 @@
  */
 package org.apache.rocketmq.broker.processor;
 
-import java.util.List;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -68,6 +66,8 @@ import org.apache.rocketmq.store.GetMessageStatus;
 import org.apache.rocketmq.store.MessageFilter;
 import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.stats.BrokerStatsManager;
+
+import java.util.List;
 
 import static org.apache.rocketmq.remoting.protocol.RemotingCommand.buildErrorResponse;
 
@@ -172,7 +172,7 @@ public class PullMessageProcessor implements NettyRequestProcessor {
             // 1. read from slave, currently not supported
             // 2. the middle queue is truncated because of deleting commitlog
             if (code != ResponseCode.SUCCESS) {
-                //note the currentItem maybe both the leader and  the earliest
+                //1note the currentItem maybe both the leader and  the earliest
                 boolean isRevised = false;
                 if (leaderItem.getGen() == currentItem.getGen()) {
                     //read the leader
@@ -192,7 +192,7 @@ public class PullMessageProcessor implements NettyRequestProcessor {
                         responseCode = code;
                     }
                 }
-                //note the currentItem maybe both the leader and  the earliest
+                //1note the currentItem maybe both the leader and  the earliest
                 if (earlistItem.getGen() == currentItem.getGen()) {
                     //read the earliest one
                     if (requestOffset < minOffset) {
